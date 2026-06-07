@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 100;
 	objects = {
 
 /* Begin PBXFileReference section */
@@ -34,10 +34,8 @@
 /* Begin PBXFrameworksBuildPhase section */
 		D1AB718B2EA0332E00B66CF3 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -71,14 +69,10 @@
 			);
 			buildRules = (
 			);
-			dependencies = (
-			);
 			fileSystemSynchronizedGroups = (
 				D1AB71902EA0332E00B66CF3 /* UIKitProject */,
 			);
 			name = UIKitProject;
-			packageProductDependencies = (
-			);
 			productName = UIKitProject;
 			productReference = D1AB718E2EA0332E00B66CF3 /* UIKitProject.app */;
 			productType = "com.apple.product-type.application";
@@ -91,7 +85,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1640;
-				LastUpgradeCheck = 1640;
+				LastUpgradeCheck = 2650;
 				TargetAttributes = {
 					D1AB718D2EA0332E00B66CF3 = {
 						CreatedOnToolsVersion = 16.4;
@@ -107,7 +101,7 @@
 			);
 			mainGroup = D1AB71852EA0332E00B66CF3;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
+			preferredProjectObjectVersion = 100;
 			productRefGroup = D1AB718F2EA0332E00B66CF3 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -120,25 +114,21 @@
 /* Begin PBXResourcesBuildPhase section */
 		D1AB718C2EA0332E00B66CF3 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		D1AB718A2EA0332E00B66CF3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		D1AB71A22EA0332F00B66CF3 /* Debug */ = {
+		D1AB71A22EA0332F00B66CF3 /* Debug configuration for PBXNativeTarget "UIKitProject" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -169,7 +159,7 @@
 			};
 			name = Debug;
 		};
-		D1AB71A32EA0332F00B66CF3 /* Release */ = {
+		D1AB71A32EA0332F00B66CF3 /* Release configuration for PBXNativeTarget "UIKitProject" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -200,7 +190,7 @@
 			};
 			name = Release;
 		};
-		D1AB71A42EA0332F00B66CF3 /* Debug */ = {
+		D1AB71A42EA0332F00B66CF3 /* Debug configuration for PBXProject "UIKitProject" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -259,12 +249,13 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
-		D1AB71A52EA0332F00B66CF3 /* Release */ = {
+		D1AB71A52EA0332F00B66CF3 /* Release configuration for PBXProject "UIKitProject" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -316,6 +307,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -327,19 +319,17 @@
 		D1AB71892EA0332E00B66CF3 /* Build configuration list for PBXProject "UIKitProject" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				D1AB71A42EA0332F00B66CF3 /* Debug */,
-				D1AB71A52EA0332F00B66CF3 /* Release */,
+				D1AB71A42EA0332F00B66CF3 /* Debug configuration for PBXProject "UIKitProject" */,
+				D1AB71A52EA0332F00B66CF3 /* Release configuration for PBXProject "UIKitProject" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		D1AB71A12EA0332F00B66CF3 /* Build configuration list for PBXNativeTarget "UIKitProject" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				D1AB71A22EA0332F00B66CF3 /* Debug */,
-				D1AB71A32EA0332F00B66CF3 /* Release */,
+				D1AB71A22EA0332F00B66CF3 /* Debug configuration for PBXNativeTarget "UIKitProject" */,
+				D1AB71A32EA0332F00B66CF3 /* Release configuration for PBXNativeTarget "UIKitProject" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */

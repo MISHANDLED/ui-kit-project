@@ -16,7 +16,6 @@ final class FloatingView: UIView {
     private let gradientView: GradientView = GradientView()
     
     private var isExpanded = true
-    private var measuredTitleWidth: CGFloat = 0
     private var animator: UIViewPropertyAnimator?
     
     override init(frame: CGRect) {

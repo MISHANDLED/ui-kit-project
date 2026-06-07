@@ -5,7 +5,6 @@
 //  Created by Devansh Mohata on 22/10/25.
 //
 
-import AVKit
 import UIKit
 
 final class InitialController: UIViewController {
@@ -86,33 +85,8 @@ extension InitialController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
-        
-        switch dataSource.dataSource(for: indexPath) {
-        case .panGesture:
-            let vc = PanViewController()
-            navigationController?.pushViewController(vc, animated: true)
-        case .pageViewController:
-            let vc = PagingViewController.createSample()
-            navigationController?.pushViewController(vc, animated: true)
-        case .properyAnimator:
-            let vc = UIProperyAnimatorVC()
-            navigationController?.pushViewController(vc, animated: true)
-        case .crashSimulator:
-            let vc = CrashViewController()
-            navigationController?.pushViewController(vc, animated: true)
-        case .miniPlayer:
-            let vc = AVPlayerViewController()
-            navigationController?.pushViewController(vc, animated: true)
-        case .htmlViewer:
-            let vc = PDFRenderer()
-            navigationController?.pushViewController(vc, animated: true)
-        case .datePicker:
-            let vc = DatePickerVC()
-            navigationController?.pushViewController(vc, animated: true)
-        case .transition:
-            let vc = ViewControllerA()
-            navigationController?.pushViewController(vc, animated: true)
-        }
+        let vc = dataSource.dataSource(for: indexPath).builder()
+        navigationController?.pushViewController(vc, animated: true)
     }
     
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
@@ -162,24 +136,24 @@ extension InitialController {
             }
         }
         
-        var viewControllerType: UIViewController.Type {
+        var builder: () -> UIViewController {
             switch self {
             case .panGesture:
-                PanViewController.self
+                { PanViewController() }
             case .pageViewController:
-                PagingViewController.self
+                { PagingViewController.createSample() }
             case .properyAnimator:
-                UIProperyAnimatorVC.self
+                { UIProperyAnimatorVC() }
             case .crashSimulator:
-                CrashViewController.self
+                { CrashViewController() }
             case .miniPlayer:
-                AVPlayerViewController.self
+                { AVPlayerViewController() }
             case .htmlViewer:
-                PDFRenderer.self
+                { PDFRenderer() }
             case .datePicker:
-                DatePickerVC.self
+                { DatePickerVC() }
             case .transition:
-                ViewControllerA.self
+                { ViewControllerA() }
             }
         }
     }

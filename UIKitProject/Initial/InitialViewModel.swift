@@ -15,7 +15,8 @@ final class InitialViewModel: InitialController.DataSource {
         .crashSimulator,
         .miniPlayer,
         .htmlViewer,
-        .datePicker
+        .datePicker,
+        .transition
     ]
     
     var numberOfSections: Int { 1 }
