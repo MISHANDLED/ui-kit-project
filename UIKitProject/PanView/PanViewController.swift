@@ -7,7 +7,11 @@
 
 import UIKit
 
-final class PanViewController: UIViewController {
+protocol PanViewDataSource: BaseViewModel {}
+
+final class PanViewModel: PanViewDataSource {}
+
+final class PanView<VM: PanViewDataSource>: UIView {
     private let containerView: UIView = UIView()
     private let squareView: UIView = UIView()
     
@@ -15,37 +19,54 @@ final class PanViewController: UIViewController {
     private let width: CGFloat = 100
     private let height: CGFloat = 100
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.backgroundColor = .green
+    required override init(frame: CGRect) {
+        super.init(frame: frame)
         createViews()
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: animated)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
+    override func layoutSubviews() {
+        super.layoutSubviews()
         
         guard !isCenterSet else { return }
         isCenterSet = true
         squareView.center = CGPoint(x: containerView.bounds.midX, y: containerView.bounds.midY)
     }
+    
+    @objc
+    private func panGestured(_ gesture: UIPanGestureRecognizer) {
+        switch gesture.state {
+        case .changed:
+            squareView.center = gesture.location(in: containerView)
+        case .ended:
+            setViewFrame(gesture.location(in: containerView))
+        default:
+            break
+        }
+    }
 }
 
-private extension PanViewController {
+extension PanView: BaseView {
+    typealias ViewModel = VM
+    
+    func bind(to viewModel: VM) {}
+}
+
+private extension PanView {
     func createViews() {
+        backgroundColor = .green
         containerView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(containerView)
+        addSubview(containerView)
         containerView.backgroundColor = .red
         
         NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            containerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            containerView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            containerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+            containerView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor),
+            containerView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
+            containerView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor),
+            containerView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor)
         ])
         
         squareView.backgroundColor = .systemBlue
@@ -57,18 +78,6 @@ private extension PanViewController {
     func addGesture() {
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(panGestured))
         squareView.addGestureRecognizer(panGesture)
-    }
-    
-    @objc
-    func panGestured(_ gesture: UIPanGestureRecognizer) {
-        switch gesture.state {
-        case .changed:
-            squareView.center = gesture.location(in: containerView)
-        case .ended:
-            setViewFrame(gesture.location(in: containerView))
-        default:
-            break
-        }
     }
     
     func setViewFrame(_ point: CGPoint) {

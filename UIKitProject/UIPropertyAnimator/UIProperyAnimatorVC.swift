@@ -7,17 +7,25 @@
 
 import UIKit
 
-final class UIProperyAnimatorVC: UIViewController {
+protocol UIProperyAnimatorViewDataSource: BaseViewModel {}
+
+final class UIProperyAnimatorViewModel: UIProperyAnimatorViewDataSource {}
+
+final class UIProperyAnimatorView<VM: UIProperyAnimatorViewDataSource>: UIView {
     private let centerImage: UIImageView = UIImageView(image: .farmHouse)
     private let slider: UISlider = UISlider()
     
     private let propertyAnimator: UIViewPropertyAnimator = UIViewPropertyAnimator(duration: 1, curve: .linear)
-    private lazy var centerYConstraint: NSLayoutConstraint = centerImage.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+    private lazy var centerYConstraint: NSLayoutConstraint = centerImage.centerYAnchor.constraint(equalTo: centerYAnchor)
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    required override init(frame: CGRect) {
+        super.init(frame: frame)
         createViews()
         addAnimation()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     deinit {
@@ -26,26 +34,37 @@ final class UIProperyAnimatorVC: UIViewController {
             propertyAnimator.finishAnimation(at: .current)
         }
     }
+    
+    @objc
+    private func valueDidChanged(_ slider: UISlider) {
+        propertyAnimator.fractionComplete = CGFloat(slider.value)
+    }
 }
 
-private extension UIProperyAnimatorVC {
+extension UIProperyAnimatorView: BaseView {
+    typealias ViewModel = VM
+    
+    func bind(to viewModel: VM) {}
+}
+
+private extension UIProperyAnimatorView {
     func createViews() {
-        view.backgroundColor = .red.withAlphaComponent(0.5)
+        backgroundColor = .red.withAlphaComponent(0.5)
         
-        view.addSubview(slider)
+        addSubview(slider)
         slider.translatesAutoresizingMaskIntoConstraints = false
         
-        view.addSubview(centerImage)
+        addSubview(centerImage)
         centerImage.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            slider.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            slider.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            slider.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            slider.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
+            slider.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            slider.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor, constant: -16),
             
             centerYConstraint,
-            centerImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            centerImage.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            centerImage.centerXAnchor.constraint(equalTo: centerXAnchor),
+            centerImage.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             centerImage.heightAnchor.constraint(equalTo: centerImage.widthAnchor, multiplier: 1)
         ])
         
@@ -63,12 +82,8 @@ private extension UIProperyAnimatorVC {
         
         propertyAnimator.addAnimations({ [weak self] in
             self?.centerYConstraint.constant = -100
-            self?.view.layoutIfNeeded()
+            self?.layoutIfNeeded()
         }, delayFactor: 0.5)
     }
     
-    @objc
-    func valueDidChanged(_ slider: UISlider) {
-        propertyAnimator.fractionComplete = CGFloat(slider.value)
-    }
 }

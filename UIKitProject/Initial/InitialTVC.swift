@@ -2,40 +2,49 @@
 //  InitialTVC.swift
 //  UIKitProject
 //
-//  Created by Devansh Mohata on 22/10/25.
-//
 
 import UIKit
 
-final class InitialTVC: UITableViewCell {
-    private let titleLabel: UILabel = UILabel()
-    
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        createViews()
+// MARK: - DataSource (file scope — protocols can't be nested in generic classes)
+
+protocol InitialCellDataSource: BaseViewModel {
+    var title: String { get }
+}
+
+// MARK: - Cell View
+
+final class InitialCellView<VM: InitialCellDataSource>: UIView {
+
+    private let titleLabel = UILabel()
+
+    required override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupViews()
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    func setData(_ text: String) {
-        titleLabel.text = text
+
+    private func setupViews() {
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(titleLabel)
+
+        NSLayoutConstraint.activate([
+            titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 16),
+            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -16),
+            titleLabel.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor, constant: -16)
+        ])
+
+        backgroundColor = .random
     }
 }
 
-private extension InitialTVC {
-    func createViews() {
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(titleLabel)
-        
-        NSLayoutConstraint.activate([
-            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
-            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: contentView.trailingAnchor, constant: -16),
-            titleLabel.bottomAnchor.constraint(lessThanOrEqualTo: contentView.bottomAnchor, constant: -16)
-        ])
-        
-        contentView.backgroundColor = .random
+extension InitialCellView: BaseView {
+    typealias ViewModel = VM
+
+    func bind(to viewModel: VM) {
+        titleLabel.text = viewModel.title
     }
 }

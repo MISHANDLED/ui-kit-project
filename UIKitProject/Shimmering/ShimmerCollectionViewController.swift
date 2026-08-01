@@ -58,7 +58,19 @@ class ShimmerCell: UICollectionViewCell {
 }
 
 // MARK: - View Controller
-class ShimmerCollectionViewController: UIViewController {
+protocol ShimmerCollectionViewDataSource: BaseViewModel {
+    var numberOfCells: Int { get }
+}
+
+final class ShimmerCollectionViewModel: ShimmerCollectionViewDataSource {
+    let numberOfCells: Int
+    
+    init(numberOfCells: Int = 5) {
+        self.numberOfCells = numberOfCells
+    }
+}
+
+final class ShimmerCollectionView<VM: ShimmerCollectionViewDataSource>: UIView, UICollectionViewDataSource {
     
     private var collectionView: UICollectionView!
     private var displayLink: CADisplayLink?
@@ -67,24 +79,38 @@ class ShimmerCollectionViewController: UIViewController {
     private let cellWidth: CGFloat = 100
     private let cellHeight: CGFloat = 50
     private let cellSpacing: CGFloat = 10
-    private let numberOfCells = 5
     private let shimmerWidth: CGFloat = 20
     
     private var maskX: CGFloat = -20
+    private var viewModel: VM?
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    required override init(frame: CGRect) {
+        super.init(frame: frame)
         setupCollectionView()
-        view.backgroundColor = .white
+        backgroundColor = .white
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        startShimmerAnimation()
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        
+        if window == nil {
+            stopShimmerAnimation()
+        } else {
+            startShimmerAnimation()
+        }
+    }
+    
+    func startShimmerAnimation() {
+        guard displayLink == nil else { return }
+        displayLink = CADisplayLink(target: self, selector: #selector(updateMaskPosition))
+        displayLink?.add(to: .main, forMode: .common)
+    }
+    
+    func stopShimmerAnimation() {
         displayLink?.invalidate()
         displayLink = nil
     }
@@ -104,19 +130,14 @@ class ShimmerCollectionViewController: UIViewController {
         collectionView.register(ShimmerCell.self, forCellWithReuseIdentifier: ShimmerCell.identifier)
         collectionView.isScrollEnabled = false
         
-        view.addSubview(collectionView)
+        addSubview(collectionView)
         
         NSLayoutConstraint.activate([
-            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            collectionView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: trailingAnchor),
             collectionView.heightAnchor.constraint(equalToConstant: 100)
         ])
-    }
-    
-    private func startShimmerAnimation() {
-        displayLink = CADisplayLink(target: self, selector: #selector(updateMaskPosition))
-        displayLink?.add(to: .main, forMode: .common)
     }
     
     @objc private func updateMaskPosition() {
@@ -139,16 +160,22 @@ class ShimmerCollectionViewController: UIViewController {
     deinit {
         displayLink?.invalidate()
     }
-}
-
-// MARK: - UICollectionViewDataSource
-extension ShimmerCollectionViewController: UICollectionViewDataSource {
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return numberOfCells
+        return viewModel?.numberOfCells ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ShimmerCell.identifier, for: indexPath) as! ShimmerCell
         return cell
+    }
+}
+
+extension ShimmerCollectionView: BaseView {
+    typealias ViewModel = VM
+    
+    func bind(to viewModel: VM) {
+        self.viewModel = viewModel
+        collectionView.reloadData()
     }
 }

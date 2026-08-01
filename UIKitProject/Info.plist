@@ -2,6 +2,25 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleURLName</key>
+			<string>com.videoArch.UIKitProject</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>uikitproject</string>
+			</array>
+		</dict>
+	</array>
+	<key>DeepLinkCustomScheme</key>
+	<string>uikitproject</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Save your screen recordings to the photo library.</string>
+	<key>UniversalLinkHosts</key>
+	<array/>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

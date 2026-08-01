@@ -7,35 +7,67 @@
 
 import UIKit
 
-// Search Bar Animation Screen 1
-final class ViewControllerA: UIViewController {
-    private let searchBar: UISearchBar = UISearchBar()
-    private let button: UIButton = UIButton(type: .system)
-    private let transitionDelegate = SearchTransitionDelegate()
+protocol SearchSourceViewDataSource: BaseViewModel {
+    var onPresentRequested: (() -> Void)? { get set }
+    func requestPresentation()
+}
+
+final class SearchSourceViewModel: SearchSourceViewDataSource {
+    var onPresentRequested: (() -> Void)?
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        createViews()
+    func requestPresentation() {
+        onPresentRequested?()
     }
 }
 
-private extension ViewControllerA {
+// Search Bar Animation Screen 1
+final class SearchSourceView<VM: SearchSourceViewDataSource>: UIView {
+    private let searchBar: UISearchBar = UISearchBar()
+    private let button: UIButton = UIButton(type: .system)
+    private var viewModel: VM?
+    
+    var transitionViews: [UIView] { [searchBar] }
+    
+    required override init(frame: CGRect) {
+        super.init(frame: frame)
+        createViews()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    @objc
+    private func didTapView() {
+        viewModel?.requestPresentation()
+    }
+}
+
+extension SearchSourceView: BaseView {
+    typealias ViewModel = VM
+    
+    func bind(to viewModel: VM) {
+        self.viewModel = viewModel
+    }
+}
+
+private extension SearchSourceView {
     func createViews() {
-        view.backgroundColor = .white
-        view.addSubview(searchBar)
+        backgroundColor = .white
+        addSubview(searchBar)
         searchBar.tag = 1
-        view.addSubview(button)
+        addSubview(button)
         
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         button.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            searchBar.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            searchBar.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            searchBar.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
             
-            button.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            button.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            button.centerXAnchor.constraint(equalTo: centerXAnchor),
+            button.centerYAnchor.constraint(equalTo: centerYAnchor),
         ])
         
         setupButton()
@@ -49,16 +81,21 @@ private extension ViewControllerA {
         button.addTarget(self, action: #selector(didTapView), for: .touchUpInside)
     }
     
-    @objc
-    func didTapView() {
-        let vcB = ViewControllerB()
-        vcB.searchTransitionDelegate = transitionDelegate
-        vcB.transitioningDelegate = transitionDelegate
-        vcB.modalPresentationStyle = .overFullScreen
-        present(vcB, animated: true)
+}
+
+final class ViewControllerA: BaseViewController<SearchSourceView<SearchSourceViewModel>> {
+    init(onPresentRequested: @escaping () -> Void) {
+        let viewModel = SearchSourceViewModel()
+        super.init(contentView: SearchSourceView(), viewModel: viewModel)
+        viewModel.onPresentRequested = onPresentRequested
     }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
 }
 
 extension ViewControllerA: TransitionViewProvider {
-    var transitionViews: [UIView] { [searchBar] }
+    var transitionViews: [UIView] { contentView.transitionViews }
 }

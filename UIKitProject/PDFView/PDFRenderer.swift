@@ -8,22 +8,19 @@
 import WebKit
 import UIKit
 
-final class PDFRenderer: UIViewController {
-    let webPreview: WKWebView = WKWebView()
+protocol PDFRendererViewDataSource: BaseViewModel {
+    var htmlString: String? { get }
+    var onHTMLLoaded: ((String) -> Void)? { get set }
+    var onRenderCompleted: ((Result<URL, Error>) -> Void)? { get set }
+    func render()
+}
+
+final class PDFRendererViewModel: PDFRendererViewDataSource {
+    var onHTMLLoaded: ((String) -> Void)?
+    var onRenderCompleted: ((Result<URL, Error>) -> Void)?
+    private(set) var htmlString: String?
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.addSubview(webPreview)
-        
-        webPreview.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            webPreview.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            webPreview.topAnchor.constraint(equalTo: view.topAnchor),
-            webPreview.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            webPreview.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-        
+    func viewDidLoad() {
         render()
     }
     
@@ -35,20 +32,72 @@ final class PDFRenderer: UIViewController {
         
         do {
             let fileData = try String(contentsOf: fileURL, encoding: .utf8)
-            webPreview.loadHTMLString(fileData, baseURL: nil)
+            htmlString = fileData
+            onHTMLLoaded?(fileData)
             
-            PDFGenerator.generatePDF(from: fileData) { result in
-                switch result {
-                case .success(let url):
-                    print("URL point: \(url)")
-                case .failure(let error):
-                    print("error: \(error.localizedDescription)")
-                }
+            PDFGenerator.generatePDF(from: fileData) { [weak self] result in
+                self?.onRenderCompleted?(result)
             }
         } catch {
             print("Unable to read file")
         }
     }
+}
+
+final class PDFRendererView<VM: PDFRendererViewDataSource>: UIView {
+    let webPreview: WKWebView = WKWebView()
+    
+    required override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupViews()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupViews() {
+        addSubview(webPreview)
+        
+        webPreview.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            webPreview.leadingAnchor.constraint(equalTo: leadingAnchor),
+            webPreview.topAnchor.constraint(equalTo: topAnchor),
+            webPreview.trailingAnchor.constraint(equalTo: trailingAnchor),
+            webPreview.bottomAnchor.constraint(equalTo: bottomAnchor)
+        ])
+    }
+}
+
+extension PDFRendererView: BaseView {
+    typealias ViewModel = VM
+    
+    func bind(to viewModel: VM) {
+        if let htmlString = viewModel.htmlString {
+            webPreview.loadHTMLString(htmlString, baseURL: nil)
+        }
+    }
+}
+
+@MainActor
+func makePDFRenderer() -> UIViewController {
+    let contentView = PDFRendererView<PDFRendererViewModel>()
+    let viewModel = PDFRendererViewModel()
+    
+    viewModel.onHTMLLoaded = { [weak contentView] htmlString in
+        contentView?.webPreview.loadHTMLString(htmlString, baseURL: nil)
+    }
+    viewModel.onRenderCompleted = { result in
+        switch result {
+        case .success(let url):
+            print("URL point: \(url)")
+        case .failure(let error):
+            print("error: \(error.localizedDescription)")
+        }
+    }
+    
+    return BaseViewController(contentView: contentView, viewModel: viewModel)
 }
 
 final class PDFGenerator {

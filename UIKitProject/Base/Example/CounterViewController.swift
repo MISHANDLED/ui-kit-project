@@ -27,7 +27,7 @@ class CounterView<VM: CounterDataSource>: UIView {
 
     var dataSource: VM?
 
-    override init(frame: CGRect) {
+    required override init(frame: CGRect) {
         super.init(frame: frame)
         setupViews()
     }
@@ -92,7 +92,6 @@ extension CounterView: BaseView {
 
 final class BasicCounterViewModel: CounterDataSource {
     private(set) var count: Int = 0
-    func viewDidLoad() {}
     func increment() { count += 1 }
     func decrement() { count -= 1 }
 }
@@ -105,8 +104,6 @@ final class BoundedCounterViewModel: CounterDataSource {
         self.range = range
         self.count = initial
     }
-
-    func viewDidLoad() {}
     func increment() { count = min(count + 1, range.upperBound) }
     func decrement() { count = max(count - 1, range.lowerBound) }
 }

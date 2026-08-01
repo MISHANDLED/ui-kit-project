@@ -150,15 +150,14 @@ class ProperShimmerTagFlowLayout: UICollectionViewFlowLayout {
 }
 
 // MARK: - View Controller
-class ProperShimmerViewController: UIViewController {
+protocol ProperShimmerViewDataSource: BaseViewModel {
+    var tags: [String] { get }
+}
+
+final class ProperShimmerViewModel: ProperShimmerViewDataSource {
+    let tags: [String]
     
-    private var collectionView: UICollectionView!
-    private var displayLink: CADisplayLink?
-    
-    private let shimmerWidth: CGFloat = 40
-    private var diagonalProgress: CGFloat = -100
-    
-    private let tags = [
+    init(tags: [String] = [
         "Swift",
         "iOS Development",
         "UIKit",
@@ -184,22 +183,47 @@ class ProperShimmerViewController: UIViewController {
         "Codable Protocol",
         "Property Wrappers",
         "Async/Await"
-    ]
+    ]) {
+        self.tags = tags
+    }
+}
+
+final class ProperShimmerView<VM: ProperShimmerViewDataSource>: UIView, UICollectionViewDataSource {
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    private var collectionView: UICollectionView!
+    private var displayLink: CADisplayLink?
+    
+    private let shimmerWidth: CGFloat = 40
+    private var diagonalProgress: CGFloat = -100
+    private var viewModel: VM?
+    
+    required override init(frame: CGRect) {
+        super.init(frame: frame)
         setupCollectionView()
-        view.backgroundColor = .white
-        title = "Diagonal Shimmer"
+        backgroundColor = .white
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        startShimmerAnimation()
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        
+        if window == nil {
+            stopShimmerAnimation()
+        } else {
+            startShimmerAnimation()
+        }
+    }
+    
+    func startShimmerAnimation() {
+        guard displayLink == nil else { return }
+        displayLink = CADisplayLink(target: self, selector: #selector(updateMaskPosition))
+        displayLink?.add(to: .main, forMode: .common)
+    }
+    
+    func stopShimmerAnimation() {
         displayLink?.invalidate()
         displayLink = nil
     }
@@ -213,19 +237,14 @@ class ProperShimmerViewController: UIViewController {
         collectionView.dataSource = self
         collectionView.register(ProperShimmerTagCell.self, forCellWithReuseIdentifier: ProperShimmerTagCell.identifier)
         
-        view.addSubview(collectionView)
+        addSubview(collectionView)
         
         NSLayoutConstraint.activate([
-            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            collectionView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
-    }
-    
-    private func startShimmerAnimation() {
-        displayLink = CADisplayLink(target: self, selector: #selector(updateMaskPosition))
-        displayLink?.add(to: .main, forMode: .common)
     }
     
     @objc private func updateMaskPosition() {
@@ -246,17 +265,23 @@ class ProperShimmerViewController: UIViewController {
     deinit {
         displayLink?.invalidate()
     }
-}
-
-// MARK: - UICollectionViewDataSource
-extension ProperShimmerViewController: UICollectionViewDataSource {
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return tags.count
+        return viewModel?.tags.count ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ProperShimmerTagCell.identifier, for: indexPath) as! ProperShimmerTagCell
-        cell.configure(with: tags[indexPath.item])
+        cell.configure(with: viewModel?.tags[indexPath.item] ?? "")
         return cell
+    }
+}
+
+extension ProperShimmerView: BaseView {
+    typealias ViewModel = VM
+    
+    func bind(to viewModel: VM) {
+        self.viewModel = viewModel
+        collectionView.reloadData()
     }
 }

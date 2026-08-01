@@ -7,14 +7,53 @@
 
 import UIKit
 
-final class FrameRecursion: UIViewController {
-    var actual: Int = 5
+protocol FrameRecursionViewDataSource: BaseViewModel {
+    var depth: Int { get }
+}
+
+final class FrameRecursionViewModel: FrameRecursionViewDataSource {
+    let depth: Int
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    init(depth: Int = 5) {
+        self.depth = depth
+    }
+}
+
+final class FrameRecursionView<VM: FrameRecursionViewDataSource>: UIView {
+    var actual: Int = 5
+    private var hasRendered = false
+    
+    required override init(frame: CGRect) {
+        super.init(frame: frame)
+        backgroundColor = .white
     }
     
-    func helper(_ parentView: UIView, n: Int) {
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        render()
+    }
+}
+
+extension FrameRecursionView: BaseView {
+    typealias ViewModel = VM
+    
+    func bind(to viewModel: VM) {
+        actual = viewModel.depth
+    }
+}
+
+extension FrameRecursionView {
+    func render() {
+        guard !hasRendered else { return }
+        hasRendered = true
+        helper(self, n: 0)
+    }
+    
+    private func helper(_ parentView: UIView, n: Int) {
         guard n < actual else { return }
         
         let view1 = UIView()

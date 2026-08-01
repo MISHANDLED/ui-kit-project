@@ -7,7 +7,11 @@
 
 import UIKit
 
-final class DatePickerVC: UIViewController {
+protocol DatePickerViewDataSource: BaseViewModel {}
+
+final class DatePickerViewModel: DatePickerViewDataSource {}
+
+final class DatePickerView<VM: DatePickerViewDataSource>: UIView {
     
     private let button: UIButton = {
         let b = UIButton(type: .system)
@@ -25,21 +29,28 @@ final class DatePickerVC: UIViewController {
         return dp
     }()
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    required override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupViews()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupViews() {
+        backgroundColor = .white
         
-        view.backgroundColor = .white
-        
-        view.addSubview(button)
-        view.addSubview(datePicker)
+        addSubview(button)
+        addSubview(datePicker)
         
         NSLayoutConstraint.activate([
-            button.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            button.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            button.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 16),
+            button.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             
             datePicker.topAnchor.constraint(equalTo: button.bottomAnchor, constant: 16),
-            datePicker.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            datePicker.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
+            datePicker.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            datePicker.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16)
         ])
         
         button.addTarget(self, action: #selector(didTapButton), for: .touchUpInside)
@@ -48,4 +59,10 @@ final class DatePickerVC: UIViewController {
     @objc private func didTapButton() {
         datePicker.isHidden.toggle()
     }
+}
+
+extension DatePickerView: BaseView {
+    typealias ViewModel = VM
+    
+    func bind(to viewModel: VM) {}
 }

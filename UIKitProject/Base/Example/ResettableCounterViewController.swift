@@ -20,7 +20,7 @@ final class ResettableCounterView<VM: ResettableCounterDataSource>: CounterView<
 
     private let resetButton = UIButton(type: .system)
 
-    override init(frame: CGRect) {
+    required init(frame: CGRect) {
         super.init(frame: frame)
         setupResetButton()
     }
@@ -51,7 +51,6 @@ final class ResettableCounterView<VM: ResettableCounterDataSource>: CounterView<
 
 final class ResettableCounterViewModel: ResettableCounterDataSource {
     private(set) var count: Int = 0
-    func viewDidLoad() {}
     func increment() { count += 1 }
     func decrement() { count -= 1 }
     func reset() { count = 0 }

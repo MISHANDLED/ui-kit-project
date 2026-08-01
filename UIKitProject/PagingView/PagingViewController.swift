@@ -7,7 +7,49 @@
 
 import UIKit
 
-final class PagingViewController: UIViewController {
+protocol PagingViewDataSource: BaseViewModel {
+    var numberOfPages: Int { get }
+    func viewModel(for index: Int) -> PagingViewController.PageViewModel?
+    func index(for id: String) -> Int?
+}
+
+final class PagingViewModel: PagingViewDataSource {
+    private let viewModels: [PagingViewController.PageViewModel]
+    
+    init(viewModels: [PagingViewController.PageViewModel]) {
+        self.viewModels = viewModels
+    }
+    
+    var numberOfPages: Int { viewModels.count }
+    
+    func viewModel(for index: Int) -> PagingViewController.PageViewModel? {
+        guard index >= 0 && index < viewModels.count else { return nil }
+        return viewModels[index]
+    }
+    
+    func index(for id: String) -> Int? {
+        viewModels.firstIndex { $0.id == id }
+    }
+}
+
+final class PagingView<VM: PagingViewDataSource>: UIView {
+    required override init(frame: CGRect) {
+        super.init(frame: frame)
+        backgroundColor = .white
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+extension PagingView: BaseView {
+    typealias ViewModel = VM
+    
+    func bind(to viewModel: VM) {}
+}
+
+final class PagingViewController: BaseViewController<PagingView<PagingViewModel>> {
     
     private let pagingVC: UIPageViewController = UIPageViewController(
         transitionStyle: .scroll,
@@ -15,15 +57,17 @@ final class PagingViewController: UIViewController {
         options: nil
     )
     
-    private var viewModels: [PageViewModel] = []
     private var viewControllerCache: [String: UIViewController] = [:]
     private var currentIndex: Int = 0
+    private let initialIndex: Int
     private let maxCacheSize = 10
     
     // Initialize with ViewModels
-    init(viewModels: [PageViewModel]) {
-        self.viewModels = viewModels
-        super.init(nibName: nil, bundle: nil)
+    init(viewModels: [PageViewModel], initialPage: Int = 0) {
+        initialIndex = viewModels.isEmpty
+            ? 0
+            : min(max(initialPage, 0), viewModels.count - 1)
+        super.init(contentView: PagingView(), viewModel: PagingViewModel(viewModels: viewModels))
     }
     
     required init?(coder: NSCoder) {
@@ -32,7 +76,6 @@ final class PagingViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
         createViews()
         setupInitialPage()
     }
@@ -44,12 +87,10 @@ final class PagingViewController: UIViewController {
     
     // Lazy creation: only create VC when needed
     private func viewController(for index: Int) -> UIViewController? {
-        guard index >= 0 && index < viewModels.count else { return nil }
-        
-        let viewModel = viewModels[index]
+        guard let pageViewModel = self.viewModel.viewModel(for: index) else { return nil }
         
         // Check cache first
-        if let cachedVC = viewControllerCache[viewModel.id] {
+        if let cachedVC = viewControllerCache[pageViewModel.id] {
             return cachedVC
         }
         
@@ -59,8 +100,8 @@ final class PagingViewController: UIViewController {
         }
         
         // Create new VC only if not in cache - THIS IS WHERE WE CREATE ON-DEMAND
-        let vc = createColorViewController(for: viewModel)
-        viewControllerCache[viewModel.id] = vc
+        let vc = createColorViewController(for: pageViewModel)
+        viewControllerCache[pageViewModel.id] = vc
         return vc
     }
     
@@ -69,7 +110,7 @@ final class PagingViewController: UIViewController {
         let keepRange = 5 // Keep VCs within ±5 pages
         
         let idsToRemove = viewControllerCache.keys.filter { id in
-            guard let index = viewModels.firstIndex(where: { $0.id == id }) else {
+            guard let index = viewModel.index(for: id) else {
                 return true // Remove if not found
             }
             // Remove if outside the keep range
@@ -87,8 +128,9 @@ final class PagingViewController: UIViewController {
     
     // Helper to get index from view controller
     private func index(of viewController: UIViewController) -> Int? {
-        for (index, viewModel) in viewModels.enumerated() {
-            if viewControllerCache[viewModel.id] === viewController {
+        for index in 0..<viewModel.numberOfPages {
+            guard let pageViewModel = viewModel.viewModel(for: index) else { continue }
+            if viewControllerCache[pageViewModel.id] === viewController {
                 return index
             }
         }
@@ -112,21 +154,26 @@ private extension PagingViewController {
         pagingVC.dataSource = self
         pagingVC.delegate = self
         addChild(pagingVC)
-        view.addSubview(pagingVC.view)
+        contentView.addSubview(pagingVC.view)
         pagingVC.didMove(toParent: self)
         
         pagingVC.view.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            pagingVC.view.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            pagingVC.view.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            pagingVC.view.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            pagingVC.view.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+            pagingVC.view.leadingAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.leadingAnchor),
+            pagingVC.view.topAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.topAnchor),
+            pagingVC.view.trailingAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.trailingAnchor),
+            pagingVC.view.bottomAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.bottomAnchor)
         ])
     }
     
     func setupInitialPage() {
-        guard !viewModels.isEmpty, let firstVC = viewController(for: 0) else { return }
+        guard
+            viewModel.numberOfPages > 0,
+            let firstVC = viewController(for: initialIndex)
+        else {
+            return
+        }
         
         pagingVC.setViewControllers(
             [firstVC],
@@ -134,7 +181,7 @@ private extension PagingViewController {
             animated: false,
             completion: nil
         )
-        currentIndex = 0
+        currentIndex = initialIndex
     }
 }
 
@@ -152,7 +199,7 @@ extension PagingViewController: UIPageViewControllerDataSource, UIPageViewContro
     }
     
     func presentationCount(for pageViewController: UIPageViewController) -> Int {
-        return viewModels.count
+        return viewModel.numberOfPages
     }
     
     func presentationIndex(for pageViewController: UIPageViewController) -> Int {
@@ -178,7 +225,7 @@ extension PagingViewController: UIPageViewControllerDataSource, UIPageViewContro
               let currentIdx = index(of: currentVC) else {
             return
         }
-        let currentViewModel = viewModels[currentIdx]
+        guard let currentViewModel = viewModel.viewModel(for: currentIdx) else { return }
         let currentId = currentViewModel.id
         
         viewControllerCache = viewControllerCache.filter { $0.key == currentId }
@@ -235,7 +282,7 @@ extension PagingViewController {
         let color: UIColor
     }
     
-    static func createSample() -> PagingViewController {
+    static func createSample(initialPage: Int? = nil) -> PagingViewController {
         let viewModels: [PageViewModel] = (0..<100).map { index in
             SamplePageViewModel(
                 id: "page_\(index + 1)",
@@ -243,6 +290,9 @@ extension PagingViewController {
                 color: [.systemRed, .systemBlue, .systemGreen, .systemOrange, .systemPurple][index % 5]
             )
         }
-        return PagingViewController(viewModels: viewModels)
+        return PagingViewController(
+            viewModels: viewModels,
+            initialPage: initialPage ?? 0
+        )
     }
 }

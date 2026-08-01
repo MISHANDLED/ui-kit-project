@@ -7,36 +7,80 @@
 
 import UIKit
 
-final class ViewControllerB: UIViewController {
-    
-    weak var searchTransitionDelegate: SearchTransitionDelegate?
+protocol SearchDestinationViewDataSource: BaseViewModel {
+    var onDismissBegan: (() -> Void)? { get set }
+    var onDismissChanged: ((CGFloat) -> Void)? { get set }
+    var onDismissFinished: (() -> Void)? { get set }
+    var onDismissCancelled: (() -> Void)? { get set }
+}
+
+final class SearchDestinationViewModel: SearchDestinationViewDataSource {
+    var onDismissBegan: (() -> Void)?
+    var onDismissChanged: ((CGFloat) -> Void)?
+    var onDismissFinished: (() -> Void)?
+    var onDismissCancelled: (() -> Void)?
+}
+
+final class SearchDestinationView<VM: SearchDestinationViewDataSource>: UIView {
     
     let blurView: UIVisualEffectView
     let containerView: UIView = UIView()
     private let searchBar: UISearchBar = UISearchBar()
+    private var viewModel: VM?
     
-    init() {
+    var transitionViews: [UIView] { [searchBar] }
+    
+    required override init(frame: CGRect) {
         self.blurView = UIVisualEffectView(effect: UIBlurEffect(style: .systemChromeMaterial))
-        super.init(nibName: nil, bundle: nil)
+        super.init(frame: frame)
+        createViews()
+        addPanGesture()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        createViews()
-        addPanGesture()
+    @objc
+    private func handlePan(_ gesture: UIPanGestureRecognizer) {
+        let translation = gesture.translation(in: self)
+        let percent = max(0, min(1, translation.y / bounds.height))
+        
+        switch gesture.state {
+        case .began:
+            viewModel?.onDismissBegan?()
+            
+        case .changed:
+            viewModel?.onDismissChanged?(percent)
+            
+        case .ended, .cancelled:
+            let velocity = gesture.velocity(in: self)
+            if percent > 0.4 || velocity.y > 800 {
+                viewModel?.onDismissFinished?()
+            } else {
+                viewModel?.onDismissCancelled?()
+            }
+            
+        default:
+            break
+        }
+    }
+}
+
+extension SearchDestinationView: BaseView {
+    typealias ViewModel = VM
+    
+    func bind(to viewModel: VM) {
+        self.viewModel = viewModel
     }
 }
 
 // MARK: - Setup
 
-private extension ViewControllerB {
+private extension SearchDestinationView {
     func createViews() {
-        view.addSubview(blurView)
-        view.addSubview(containerView)
+        addSubview(blurView)
+        addSubview(containerView)
         containerView.addSubview(searchBar)
         searchBar.tag = 1
         
@@ -45,15 +89,15 @@ private extension ViewControllerB {
         }
         
         NSLayoutConstraint.activate([
-            blurView.topAnchor.constraint(equalTo: view.topAnchor),
-            blurView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            blurView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            blurView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            blurView.topAnchor.constraint(equalTo: topAnchor),
+            blurView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            blurView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            blurView.bottomAnchor.constraint(equalTo: bottomAnchor),
             
-            containerView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            containerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            containerView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            containerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            containerView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            containerView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
+            containerView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            containerView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -16),
             
             searchBar.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             searchBar.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 16),
@@ -75,34 +119,30 @@ private extension ViewControllerB {
 
 // MARK: - Pan Dismiss
 
-private extension ViewControllerB {
-    @objc
-    func handlePan(_ gesture: UIPanGestureRecognizer) {
-        let translation = gesture.translation(in: view)
-        let percent = max(0, min(1, translation.y / view.bounds.height))
-        
-        switch gesture.state {
-        case .began:
-            searchTransitionDelegate?.beginInteraction()
-            dismiss(animated: true)
-            
-        case .changed:
-            searchTransitionDelegate?.updateInteraction(percent)
-            
-        case .ended, .cancelled:
-            let velocity = gesture.velocity(in: view)
-            if percent > 0.4 || velocity.y > 800 {
-                searchTransitionDelegate?.finishInteraction()
-            } else {
-                searchTransitionDelegate?.cancelInteraction()
-            }
-            
-        default:
-            break
+final class ViewControllerB: BaseViewController<SearchDestinationView<SearchDestinationViewModel>> {
+    init(onDismissInteraction: @escaping (SearchDismissalInteraction) -> Void) {
+        let viewModel = SearchDestinationViewModel()
+        super.init(contentView: SearchDestinationView(), viewModel: viewModel)
+        viewModel.onDismissBegan = {
+            onDismissInteraction(.began)
+        }
+        viewModel.onDismissChanged = { progress in
+            onDismissInteraction(.changed(progress: progress))
+        }
+        viewModel.onDismissFinished = {
+            onDismissInteraction(.finished)
+        }
+        viewModel.onDismissCancelled = {
+            onDismissInteraction(.cancelled)
         }
     }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
 }
 
 extension ViewControllerB: TransitionViewProvider {
-    var transitionViews: [UIView] { [searchBar] }
+    var transitionViews: [UIView] { contentView.transitionViews }
 }

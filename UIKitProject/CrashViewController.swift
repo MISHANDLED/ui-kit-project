@@ -7,19 +7,25 @@
 
 import UIKit
 
-final class CrashViewController: UIViewController {
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.backgroundColor = .random
+protocol CrashViewDataSource: BaseViewModel {
+    var onPopRequested: (() -> Void)? { get set }
+    var onSelfAccessRequested: (() -> AnyObject?)? { get set }
+}
+
+final class CrashViewModel: CrashViewDataSource {
+    var onPopRequested: (() -> Void)?
+    var onSelfAccessRequested: (() -> AnyObject?)?
+    
+    func viewDidLoad() {
         
         // CRASH: [unowned self] + async work after screen dismissal
         // Self is captured as unowned at Task creation, but deallocated when popped.
         // Accessing unowned reference after deallocation = crash
         Task { [unowned self] in
             print("In Task")
-            navigationController?.popViewController(animated: true)
+            onPopRequested?()
             try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 sec
-            print("Accessing self: \(self)")  // Crash here - self is deallocated
+            print("Accessing self: \(String(describing: onSelfAccessRequested?()))")  // Crash here - owner can be deallocated
         }
         
         // SAFE but MEMORY LEAK: [weak self] with strong reference via guard let
@@ -33,4 +39,32 @@ final class CrashViewController: UIViewController {
 //            print("Accessing self: \(self)")
 //        }
     }
+}
+
+final class CrashView<VM: CrashViewDataSource>: UIView {
+    required override init(frame: CGRect) {
+        super.init(frame: frame)
+        backgroundColor = .random
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+extension CrashView: BaseView {
+    typealias ViewModel = VM
+    
+    func bind(to viewModel: VM) {}
+}
+
+@MainActor
+func makeCrashViewController(onPopRequested: @escaping () -> Void) -> UIViewController {
+    let viewModel = CrashViewModel()
+    let viewController = BaseViewController(contentView: CrashView(), viewModel: viewModel)
+    
+    viewModel.onPopRequested = onPopRequested
+    viewModel.onSelfAccessRequested = { [unowned viewController] in viewController }
+    
+    return viewController
 }
