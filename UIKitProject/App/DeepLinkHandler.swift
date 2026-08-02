@@ -95,8 +95,6 @@ struct DeepLinkHandler: DeepLinkHandling {
             return .miniPlayer
         case "html":
             return .htmlViewer
-        case "date-picker":
-            return .datePicker
         case "search":
             return .searchTransition
         default:

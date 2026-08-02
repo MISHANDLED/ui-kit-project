@@ -12,7 +12,6 @@ Personal iOS sandbox for experimenting with UIKit APIs and patterns. Programmati
 | **Simulate Crash** | Educational `[unowned self]` crash demo inside an async `Task` |
 | **Mini Player** | `AVPlayer` with aspect-correct layout, animates small → fullscreen |
 | **HTML Viewer** | `WKWebView` + HTML → PDF generation via `UIPrintPageRenderer` |
-| **Date Picker** | Toggle-visible `UIDatePicker` (wheels style) |
 
 ## Utilities
 
@@ -46,7 +45,7 @@ The registered custom scheme can be exercised in Simulator:
 ```sh
 xcrun simctl openurl booted 'uikitproject://open/pan'
 xcrun simctl openurl booted 'uikitproject://open/pages?index=12'
-xcrun simctl openurl booted 'uikitproject://open/date-picker'
+xcrun simctl openurl booted 'uikitproject://open/mini-player'
 ```
 
 Universal-link parsing is supported for hosts listed in the `UniversalLinkHosts` array in `Info.plist`. Delivering those links from iOS also requires the Associated Domains capability and a matching `apple-app-site-association` file for the chosen domain.

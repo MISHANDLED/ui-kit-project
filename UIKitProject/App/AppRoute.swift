@@ -11,7 +11,6 @@ enum AppRoute: Hashable {
     case crashSimulator
     case miniPlayer
     case htmlViewer
-    case datePicker
     case searchTransition
     case searchDestination
 }

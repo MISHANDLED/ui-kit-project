@@ -17,7 +17,6 @@ final class InitialViewModelTests: XCTestCase {
             .crashSimulator,
             .miniPlayer,
             .htmlViewer,
-            .datePicker,
             .searchTransition
         ]
         let viewModel = InitialViewModel()

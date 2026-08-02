@@ -14,7 +14,6 @@ enum InitialCellType: CustomStringConvertible {
     case crashSimulator
     case miniPlayer
     case htmlViewer
-    case datePicker
     case transition
 
     var description: String {
@@ -25,7 +24,6 @@ enum InitialCellType: CustomStringConvertible {
         case .crashSimulator: "Simulate Crash"
         case .miniPlayer: "Mini Player"
         case .htmlViewer: "HTML Viewer"
-        case .datePicker: "Date Picker"
         case .transition: "Search Transition"
         }
     }
@@ -38,7 +36,6 @@ enum InitialCellType: CustomStringConvertible {
         case .crashSimulator: .crashSimulator
         case .miniPlayer: .miniPlayer
         case .htmlViewer: .htmlViewer
-        case .datePicker: .datePicker
         case .transition: .searchTransition
         }
     }
@@ -68,7 +65,6 @@ final class InitialViewModel: InitialViewDataSource {
         .crashSimulator,
         .miniPlayer,
         .htmlViewer,
-        .datePicker,
         .transition
     ].map { InitialCellViewModel(type: $0) }
 

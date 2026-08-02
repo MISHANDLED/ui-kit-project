@@ -59,12 +59,6 @@ struct AppScreenFactory: AppScreenBuilding {
         case .htmlViewer:
             return makePDFRenderer()
 
-        case .datePicker:
-            return BaseViewController(
-                contentView: DatePickerView<DatePickerViewModel>(),
-                viewModel: DatePickerViewModel()
-            )
-
         case .searchTransition:
             return ViewControllerA {
                 onAction(.navigate(to: .searchDestination))

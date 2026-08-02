@@ -31,16 +31,16 @@ final class AppCoordinatorTests: XCTestCase {
         let coordinator = AppCoordinator(
             navigationController: navigationController,
             screenFactory: ScreenFactorySpy(),
-            deepLinkHandler: DeepLinkHandlerStub(route: .datePicker)
+            deepLinkHandler: DeepLinkHandlerStub(route: .htmlViewer)
         )
-        let url = try XCTUnwrap(URL(string: "uikitproject://open/date-picker"))
+        let url = try XCTUnwrap(URL(string: "uikitproject://open/html"))
 
         XCTAssertTrue(coordinator.handle(url: url))
         XCTAssertTrue(navigationController.viewControllers.isEmpty)
 
         coordinator.start()
 
-        XCTAssertEqual(routes(in: navigationController), [.home, .datePicker])
+        XCTAssertEqual(routes(in: navigationController), [.home, .htmlViewer])
     }
 
     @MainActor

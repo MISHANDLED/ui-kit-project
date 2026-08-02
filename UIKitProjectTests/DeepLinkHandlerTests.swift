@@ -31,13 +31,13 @@ final class DeepLinkHandlerTests: XCTestCase {
     }
 
     func testUniversalLinkFromAllowedHostMapsToRoute() throws {
-        let url = try XCTUnwrap(URL(string: "https://links.example.com/open/date-picker"))
+        let url = try XCTUnwrap(URL(string: "https://links.example.com/open/mini-player"))
 
-        XCTAssertEqual(handler.route(from: url), .datePicker)
+        XCTAssertEqual(handler.route(from: url), .miniPlayer)
     }
 
     func testUniversalLinkFromUnknownHostIsRejected() throws {
-        let url = try XCTUnwrap(URL(string: "https://malicious.example/open/date-picker"))
+        let url = try XCTUnwrap(URL(string: "https://malicious.example/open/mini-player"))
 
         XCTAssertNil(handler.route(from: url))
     }
