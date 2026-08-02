@@ -97,6 +97,8 @@ struct DeepLinkHandler: DeepLinkHandling {
             return .miniPlayer
         case "html":
             return .htmlViewer
+        case "wheel":
+            return .wheelCollectionLayout
         case "search":
             return .searchTransition
         default:

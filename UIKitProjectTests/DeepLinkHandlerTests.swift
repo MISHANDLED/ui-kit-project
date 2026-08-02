@@ -38,6 +38,12 @@ final class DeepLinkHandlerTests: XCTestCase {
         XCTAssertEqual(handler.route(from: url), .miniPlayer)
     }
 
+    func testWheelDeepLinkMapsToRoute() throws {
+        let url = try XCTUnwrap(URL(string: "uikitproject://open/wheel"))
+
+        XCTAssertEqual(handler.route(from: url), .wheelCollectionLayout)
+    }
+
     func testUniversalLinkFromUnknownHostIsRejected() throws {
         let url = try XCTUnwrap(URL(string: "https://malicious.example/open/mini-player"))
 

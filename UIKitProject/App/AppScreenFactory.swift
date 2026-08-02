@@ -61,6 +61,9 @@ struct AppScreenFactory: AppScreenBuilding {
         case .htmlViewer:
             return makePDFRenderer()
 
+        case .wheelCollectionLayout:
+            return WheelCollectionViewController()
+
         case .searchTransition:
             return ViewControllerA {
                 onAction(.navigate(to: .searchDestination))

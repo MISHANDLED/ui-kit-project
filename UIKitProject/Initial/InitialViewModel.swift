@@ -16,6 +16,7 @@ enum InitialCellType: CustomStringConvertible {
     case crashSimulator
     case miniPlayer
     case htmlViewer
+    case wheelCollectionLayout
     case transition
 
     var description: String {
@@ -26,6 +27,7 @@ enum InitialCellType: CustomStringConvertible {
         case .crashSimulator: "Simulate Crash"
         case .miniPlayer: "Mini Player"
         case .htmlViewer: "HTML Viewer"
+        case .wheelCollectionLayout: "Wheel Collection Layout"
         case .transition: "Search Transition"
         }
     }
@@ -38,6 +40,7 @@ enum InitialCellType: CustomStringConvertible {
         case .crashSimulator: .crashSimulator
         case .miniPlayer: .miniPlayer
         case .htmlViewer: .htmlViewer
+        case .wheelCollectionLayout: .wheelCollectionLayout
         case .transition: .searchTransition
         }
     }
@@ -67,6 +70,7 @@ final class InitialViewModel: InitialViewDataSource {
         .crashSimulator,
         .miniPlayer,
         .htmlViewer,
+        .wheelCollectionLayout,
         .transition
     ].map { InitialCellViewModel(type: $0) }
 
