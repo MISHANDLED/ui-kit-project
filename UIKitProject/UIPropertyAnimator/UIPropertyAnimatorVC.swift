@@ -1,5 +1,5 @@
 //
-//  UIProperyAnimatorVC.swift
+//  UIPropertyAnimatorVC.swift
 //  UIKitProject
 //
 //  Created by Devansh Mohata on 23/10/25.
@@ -7,11 +7,11 @@
 
 import UIKit
 
-protocol UIProperyAnimatorViewDataSource: BaseViewModel {}
+protocol UIPropertyAnimatorViewDataSource: BaseViewModel {}
 
-final class UIProperyAnimatorViewModel: UIProperyAnimatorViewDataSource {}
+final class UIPropertyAnimatorViewModel: UIPropertyAnimatorViewDataSource {}
 
-final class UIProperyAnimatorView<VM: UIProperyAnimatorViewDataSource>: UIView {
+final class UIPropertyAnimatorView<VM: UIPropertyAnimatorViewDataSource>: UIView {
     private let centerImage: UIImageView = UIImageView(image: .farmHouse)
     private let slider: UISlider = UISlider()
     
@@ -28,26 +28,19 @@ final class UIProperyAnimatorView<VM: UIProperyAnimatorViewDataSource>: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    deinit {
-        if propertyAnimator.state != .inactive {
-            propertyAnimator.stopAnimation(false)
-            propertyAnimator.finishAnimation(at: .current)
-        }
-    }
-    
     @objc
     private func valueDidChanged(_ slider: UISlider) {
         propertyAnimator.fractionComplete = CGFloat(slider.value)
     }
 }
 
-extension UIProperyAnimatorView: BaseView {
+extension UIPropertyAnimatorView: BaseView {
     typealias ViewModel = VM
     
     func bind(to viewModel: VM) {}
 }
 
-private extension UIProperyAnimatorView {
+private extension UIPropertyAnimatorView {
     func createViews() {
         backgroundColor = .red.withAlphaComponent(0.5)
         

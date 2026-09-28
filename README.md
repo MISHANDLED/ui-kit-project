@@ -23,9 +23,9 @@ Personal iOS sandbox for experimenting with UIKit APIs and patterns. Programmati
 
 ## Requirements
 
-- iOS 16+
-- Xcode 15+
-- Swift 5.9+
+- iOS 18.5+
+- Xcode 16.4+
+- Swift 6 language mode
 
 No external dependencies.
 

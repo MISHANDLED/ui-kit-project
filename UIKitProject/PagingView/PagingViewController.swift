@@ -236,10 +236,12 @@ extension PagingViewController: UIPageViewControllerDataSource, UIPageViewContro
 extension PagingViewController {
     final class InternalClass: UIViewController {
         private let viewModel: PageViewModel
+        private let pageID: String
         private let titleLabel: UILabel = UILabel()
         
         init(viewModel: PageViewModel) {
             self.viewModel = viewModel
+            self.pageID = viewModel.id
             super.init(nibName: nil, bundle: nil)
             print("\(#function) called for page ID:\(viewModel.id)")
         }
@@ -249,7 +251,7 @@ extension PagingViewController {
         }
         
         deinit {
-            print("\(#function) called for page ID:\(viewModel.id)")
+            print("\(#function) called for page ID:\(pageID)")
         }
         
         override func viewDidLoad() {

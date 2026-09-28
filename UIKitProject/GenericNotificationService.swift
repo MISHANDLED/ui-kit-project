@@ -9,7 +9,7 @@ import Foundation
 import Combine
 
 // MARK: - Generic NotificationCenter
-class GenericNotificationCenter {
+final class GenericNotificationCenter: @unchecked Sendable {
     
     static let shared = GenericNotificationCenter()
     

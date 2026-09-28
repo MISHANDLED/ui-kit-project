@@ -157,10 +157,6 @@ final class ShimmerCollectionView<VM: ShimmerCollectionViewDataSource>: UIView, 
         }
     }
     
-    deinit {
-        displayLink?.invalidate()
-    }
-    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return viewModel?.numberOfCells ?? 0
     }

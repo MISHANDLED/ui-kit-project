@@ -8,6 +8,7 @@
 import UIKit
 
 // MARK: - Protocol
+@MainActor
 protocol TransitionViewProvider: AnyObject {
     var transitionViews: [UIView] { get }
 }

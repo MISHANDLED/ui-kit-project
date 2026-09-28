@@ -43,8 +43,8 @@ struct AppScreenFactory: AppScreenBuilding {
 
         case .propertyAnimator:
             return BaseViewController(
-                contentView: UIProperyAnimatorView<UIProperyAnimatorViewModel>(),
-                viewModel: UIProperyAnimatorViewModel()
+                contentView: UIPropertyAnimatorView<UIPropertyAnimatorViewModel>(),
+                viewModel: UIPropertyAnimatorViewModel()
             )
 
         case .crashSimulator:

@@ -262,10 +262,6 @@ final class ProperShimmerView<VM: ProperShimmerViewDataSource>: UIView, UICollec
         }
     }
     
-    deinit {
-        displayLink?.invalidate()
-    }
-    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return viewModel?.tags.count ?? 0
     }

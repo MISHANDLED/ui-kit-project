@@ -27,13 +27,6 @@ final class FloatingView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    deinit {
-        if let animator = animator, animator.state != .inactive {
-            animator.stopAnimation(false)
-            animator.finishAnimation(at: .current)
-        }
-    }
-    
     override func layoutSubviews() {
         super.layoutSubviews()
         containerView.layer.cornerRadius = containerView.bounds.height / 2

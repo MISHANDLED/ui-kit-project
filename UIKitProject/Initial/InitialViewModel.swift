@@ -12,7 +12,7 @@ import Foundation
 enum InitialCellType: CustomStringConvertible {
     case panGesture
     case pageViewController
-    case properyAnimator
+    case propertyAnimator
     case crashSimulator
     case miniPlayer
     case htmlViewer
@@ -23,7 +23,7 @@ enum InitialCellType: CustomStringConvertible {
         switch self {
         case .panGesture: "Pan Gesture"
         case .pageViewController: "Page View Controller"
-        case .properyAnimator: "Property Animator"
+        case .propertyAnimator: "Property Animator"
         case .crashSimulator: "Simulate Crash"
         case .miniPlayer: "Mini Player"
         case .htmlViewer: "HTML Viewer"
@@ -36,7 +36,7 @@ enum InitialCellType: CustomStringConvertible {
         switch self {
         case .panGesture: .panGesture
         case .pageViewController: .page(index: nil)
-        case .properyAnimator: .propertyAnimator
+        case .propertyAnimator: .propertyAnimator
         case .crashSimulator: .crashSimulator
         case .miniPlayer: .miniPlayer
         case .htmlViewer: .htmlViewer
@@ -66,7 +66,7 @@ final class InitialViewModel: InitialViewDataSource {
     private let cellViewModels: [InitialCellViewModel] = [
         .panGesture,
         .pageViewController,
-        .properyAnimator,
+        .propertyAnimator,
         .crashSimulator,
         .miniPlayer,
         .htmlViewer,
